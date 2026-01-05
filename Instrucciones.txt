@@ -1,0 +1,91 @@
+[] Configuración y Carga de Datos
+-- [] Iniciar EntityManager: Leer la configuración del archivo persistence.xml y establecer la conexión. Si funciona, mostrar "Conexión establecida".
+
+-- [] Datos de Prueba (Seed): Borrar contenido actual de la base de datos y precargar datos ficticios para poder trabajar sin meterlos a mano cada vez:
+--- Concesionario principal.
+--- Varios tipos de Equipamiento (ej. "Aire Acondicionado", 500€).
+--- Varios Mecanicos.
+--- Varios Propietarios.
+--- Varios Coches.
+
+[] Gestión de Stock (Altas)
+-- [] Alta de Concesionario: Pide nombre y dirección para crear punto de venta.
+
+-- [] Alta de Coche: Registra un nuevo vehículo en el stock.
+--- Pedir la Matrícula (que será su identificador único).
+--- Pedir marca, modelo y precio base.
+--- Solicitar ID de un Concesionario existente para asociarlo (Relación N:1).
+
+[] Taller y Equipamiento (Relaciones N:M)
+-- [] Instalar Extra: Pide una matrícula de coche y un ID de equipamiento.
+--- Asocia el equipamiento al coche.
+--- Lógica: Debe mostrar por consola el nuevo precio total del coche (Precio Base + Suma de precios de extras).
+
+-- [] Registrar Reparación: Pide matrícula de coche e ID de mecánico.
+--- Requisito Adicional: Solicitar además la Fecha de reparación, Coste de intervención y breve Descripción (ej. "Cambio de aceite").
+
+[] Ventas (Transacciones y Entidad Venta)
+-- [] Vender Coche: Esta es la operación crítica del negocio.
+--- Pide datos de un nuevo Propietario (DNI, Nombre).
+--- Pide la matrícula del coche a vender y el ID del Concesionario que realiza la venta.
+--- Requisito de Histórico: Generar registro de Venta que guarde fecha actual, precio final pactado, comprador y concesionario vendedor.
+--- Operación Transaccional
+--- Nota: Debe controlarse si el coche no existe o ya está vendido.
+
+[] Consultas e Informes
+-- [] Stock de Concesionario: Dado un ID de concesionario, lista todos los coches que están actualmente allí (no vendidos). 
+
+-- [] Historial de Mecánico: Dado un ID de mecánico, muestra la lista de reparaciones que ha realizado, incluyendo fecha y matrícula del coche. 
+
+-- [] Ventas por Concesionario: Listar todas las Ventas realizadas por un Concesionario, mostrando el importe total recaudado.
+
+-- [] Coste actual de Coche: Sólo disponible para Coches con Propietario. Mostrar el coste total invertido en el coche incluyendo precio de compra, reparaciones y extras.
+
+Apreciaciones a tener en cuenta
+[] La base de datos se debe generar desde el código Java con la opción correspondiente del fichero persistence.xml. No se crea manualmente de manera previa en Workbench, ni mediante sentencia DDL en el código Java.
+
+[] Claves Primarias (PK):
+
+-- [] Para Coche, la clave primaria es la Matrícula (String). No existe por lo tanto id numérico en la tabla correspondiente. Debe validarse que la matrícula tenga un formato correcto (4 dígitos seguidos de 3 letras).
+
+-- [] Para el resto (Concesionario, Mecánico, Venta, etc.) se debe usar un id numérico autogenerado.
+
+[] Consultas: Prohibido usar SQL nativo. Todas las consultas del apartado 5 deben realizarse utilizando JPQL (Java Persistence Query Language) sobre los objetos.
+
+[] Relaciones y Entidades Intermedias:
+
+-- [] N:M Simple (Coche-Equipamiento): Hibernate genera la tabla intermedia automáticamente (@ManyToMany).
+
+-- [] N:M Compleja (Coche-Mecanico): Se usa la entidad explícita Reparacion para guardar atributos extra (fecha, coste).
+
+-- [] Histórico (Venta): Es una entidad que vincula Concesionario, Propietario y Coche en un momento del tiempo.
+
+[] Gestión de Recursos: Deben cerrarse los recursos correctamente una vez finaliza su uso.
+
+[] Excepciones: Se deben capturar y gestionar todas las excepciones que puedan ser lanzadas, evitando que el programa se detenga con error fatal.
+
+Requisitos Técnicos
+[] Cero SQL Manual: Prohibido usar INSERT, CREATE o SELECT nativo. Todo debe ser gestionado por el ORM.
+
+[] Configuración Externa: La conexión a BBDD debe estar definida en el fichero src/main/resources/META-INF/persistence.xml.
+
+[] Anotaciones: Uso correcto de @Entity, @OneToOne (si aplica), @ManyToOne, @ManyToMany y @OneToMany.
+
+[] Librerías: Uso de Maven para la gestión de dependencias (Hibernate Core + MySQL Connector).
+
+
+Entrega
+Fichero comprimido "AD_RA3_Garcia_Salas_Daniel.zip" conteniendo:
+
+Proyecto IntelliJ/Maven completo (¡Importante! Ejecuta mvn clean antes de comprimir para borrar la carpeta target y que pese menos).
+
+Captura de pantalla del esquema de tablas generado en MySQL (puedes usar Workbench) donde se vean las tablas y las líneas de relación (Foreign Keys).
+
+Criterios de evaluación
+[] Se ha instalado la herramienta ORM.
+[] Se ha configurado la herramienta ORM.
+[] Se han definido configuraciones de mapeo.
+[] Se han aplicado mecanismos de persistencia a los objetos.
+[] Se han desarrollado aplicaciones que modifican y recuperan objetos persistentes.
+[] Se han desarrollado aplicaciones que realizan consultas usando el lenguaje SQL.
+[] Se han gestionado las transacciones.
