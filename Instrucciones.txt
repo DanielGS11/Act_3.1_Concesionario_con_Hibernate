@@ -1,7 +1,7 @@
-[] Configuración y Carga de Datos
--- [] Iniciar EntityManager: Leer la configuración del archivo persistence.xml y establecer la conexión. Si funciona, mostrar "Conexión establecida".
+[X] Configuración y Carga de Datos
+-- [X] Iniciar EntityManager: Leer la configuración del archivo persistence.xml y establecer la conexión. Si funciona, mostrar "Conexión establecida".
 
--- [] Datos de Prueba (Seed): Borrar contenido actual de la base de datos y precargar datos ficticios para poder trabajar sin meterlos a mano cada vez:
+-- [X] Datos de Prueba (Seed): Borrar contenido actual de la base de datos y precargar datos ficticios para poder trabajar sin meterlos a mano cada vez:
 --- Concesionario principal.
 --- Varios tipos de Equipamiento (ej. "Aire Acondicionado", 500€).
 --- Varios Mecanicos.
