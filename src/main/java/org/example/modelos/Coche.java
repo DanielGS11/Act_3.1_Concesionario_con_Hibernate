@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Coche")
@@ -30,7 +31,7 @@ public class Coche {
             joinColumns = @JoinColumn(name = "coche_matricula"),
             inverseJoinColumns = @JoinColumn(name = "equipamiento_id")
     )
-    public List<Equipamiento> equipamientos;
+    public Set<Equipamiento> equipamientos;
 
     public Coche(String matricula, String marca, String modelo, double precio_base) {
         this.matricula = matricula;
@@ -86,11 +87,11 @@ public class Coche {
         this.propietario = propietario;
     }
 
-    public List<Equipamiento> getEquipamientos() {
+    public Set<Equipamiento> getEquipamientos() {
         return equipamientos;
     }
 
-    public void setEquipamientos(List<Equipamiento> equipamientos) {
+    public void setEquipamientos(Set<Equipamiento> equipamientos) {
         this.equipamientos = equipamientos;
     }
 }

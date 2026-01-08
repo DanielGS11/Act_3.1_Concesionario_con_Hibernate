@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Gestor_Concesionario {
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("concesionarioHibernate");
@@ -101,6 +102,63 @@ public class Gestor_Concesionario {
         }
     }
 
+    public void taller(int opc) {
+        abrirConexion();
+        Scanner sc = new Scanner(System.in);
+
+        switch (opc) {
+            case 1:
+                try {
+                    System.out.println("Vamos a añadir un equpamiento a un coche");
+                    System.out.print("Introduzca la matricula del coche: ");
+                    String matricula = sc.nextLine().toUpperCase();
+
+                    Query q = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula");
+                    q.setParameter("matricula", matricula);
+
+                    Coche coche = (Coche) q.getSingleResult();
+
+                    try {
+                        System.out.print("Introduzca la ID del equipamiento a añadir: ");
+                        String id = sc.nextLine();
+
+                        q = em.createQuery("SELECT e FROM Equipamiento e WHERE e.id = :id");
+                        q.setParameter("id", id);
+
+                        Equipamiento equipamiento = (Equipamiento) q.getSingleResult();
+
+                        if (coche.getEquipamientos().contains(equipamiento)) {
+                            System.out.println("El coche ya tenia el equipamiento " + equipamiento.getNombre());
+
+                        } else {
+                            coche.getEquipamientos().add(equipamiento);
+
+                            coche.setPrecio_base(coche.getPrecio_base() + equipamiento.getCoste());
+
+                            System.out.println("Precio Actual del coche: " + coche.getPrecio_base());
+
+                            em.merge(coche);
+
+                            em.getTransaction().commit();
+                        }
+                    } catch (NoResultException e) {
+                        System.out.println("No existe un equipamiento con ese ID");
+                    }
+                } catch (NoResultException e) {
+                    System.out.println("No existe un coche con esa matricula");
+                }
+                break;
+
+            case 2:
+
+                break;
+
+            default:
+                System.out.println("Por favor, introduzca la opcion correcta");
+                break;
+        }
+    }
+
     //----------------------------------------------- METODOS AUXILIARES -----------------------------------------------
     private void abrirConexion() {
         if (!em.getTransaction().isActive()) {
@@ -143,7 +201,7 @@ public class Gestor_Concesionario {
         Coche coche1 = new Coche("1234ABC", "Toyota", "Corolla", 20000);
         Coche coche2 = new Coche("5678DEF", "Seat", "Ibiza", 15000);
 
-        coche1.setEquipamientos(List.of(aire, gps));
+        coche1.setEquipamientos(Set.of(aire, gps));
         coche2.setConcesionario(concesionario);
         coche2.setPropietario(p2);
 
