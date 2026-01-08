@@ -25,4 +25,6 @@ public class Concesionario {
         this.nombre = nombre;
         this.direccion = direccion;
     }
+
+    public Concesionario() {}
 }

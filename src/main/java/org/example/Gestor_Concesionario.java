@@ -1,54 +1,132 @@
 package org.example;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 import org.example.modelos.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Scanner;
 
 public class Gestor_Concesionario {
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("concesionarioHibernate");
     private final EntityManager em = emf.createEntityManager();
 
-    public void IniciarEntityManager() {
-        try {
-            if (!em.getTransaction().isActive()) {
-                abrirConexion();
-            }
+    public void iniciarEntityManager() {
+        if (!em.getTransaction().isActive()) {
+            abrirConexion();
+        }
 
-            em.createQuery("DELETE FROM Reparacion").executeUpdate();
-            em.createQuery("DELETE FROM Venta").executeUpdate();
-            em.createQuery("DELETE FROM Coche").executeUpdate();
-            em.createQuery("DELETE FROM Equipamiento").executeUpdate();
-            em.createQuery("DELETE FROM Mecanico").executeUpdate();
-            em.createQuery("DELETE FROM Propietario").executeUpdate();
-            em.createQuery("DELETE FROM Concesionario").executeUpdate();
+        try {
+
+            limpiarTablas();
 
             plantillaDatos();
 
             em.getTransaction().commit();
 
             System.out.println("Datos Iniciales cargados con exito");
-        } catch (Exception e) {
-            em.getTransaction().rollback();
+
+        } catch (RuntimeException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
 
             System.out.println("Carga de datos cancelada con exito");
-        } finally {
-            em.close();
+            System.out.println(e.getMessage());
+
+        }
+    }
+
+    public void gestionStock(int opc) {
+        abrirConexion();
+        Scanner sc = new Scanner(System.in);
+
+        switch (opc) {
+            case 1:
+                System.out.print("Introduzca el nombre del concesionario: ");
+                String concesionarioName = sc.nextLine();
+
+                System.out.print("Introduzca la direccion del concesionario: ");
+                String concesionarioDirection = sc.nextLine();
+
+                Concesionario concesionario = new Concesionario(concesionarioName, concesionarioDirection);
+
+                em.persist(concesionario);
+
+                em.getTransaction().commit();
+                break;
+
+            case 2:
+                System.out.print("Introduzca la matricula del coche: ");
+                String matricula = sc.nextLine().toUpperCase();
+
+                System.out.print("Introduzca el modelo del coche: ");
+                String model = sc.nextLine();
+
+                System.out.print("Introduzca la marca del coche: ");
+                String marca = sc.nextLine();
+
+                System.out.print("Introduzca el precio base del coche: ");
+                double precioBase = Double.parseDouble(sc.nextLine());
+
+                System.out.print("Introduzca la ID del concesionario al que pertenece coche: ");
+                int idConcesionario = Integer.parseInt(sc.nextLine());
+
+                Coche coche = new Coche(matricula, marca, model, precioBase);
+
+                try {
+                    Query q = em.createQuery("Select c FROM Concesionario c WHERE c.id = :id");
+                    q.setParameter("id", idConcesionario);
+
+                    Concesionario c = (Concesionario) q.getSingleResult();
+
+                    coche.setConcesionario(c);
+
+                    em.persist(coche);
+
+                    try {
+                        em.getTransaction().commit();
+                    } catch (RuntimeException e) {
+                        System.out.printf("El coche con matricula %s ya existe\n", matricula);
+                    }
+                } catch (NoResultException e) {
+                    System.out.println("La ID del concesionario no existe");
+                }
+                break;
+
+            default:
+                System.out.println("Por favor, introduzca la opcion correcta");
+                break;
         }
     }
 
     //----------------------------------------------- METODOS AUXILIARES -----------------------------------------------
-    public void abrirConexion() {
-        em.getTransaction().begin();
+    private void abrirConexion() {
+        if (!em.getTransaction().isActive()) {
+            try {
+                System.out.println("Conectando a la base de datos...");
+                Thread.sleep(0000);
 
-        System.out.println("Conexion Establecida");
+                em.getTransaction().begin();
+
+                System.out.println("Conexion Establecida");
+            } catch (InterruptedException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
     }
 
-    //------------------------------------------------ DATOS INICIALES -------------------------------------------------
+    private void limpiarTablas() {
+        em.createQuery("DELETE FROM Reparacion").executeUpdate();
+        em.createQuery("DELETE FROM Venta").executeUpdate();
+        em.createQuery("DELETE FROM Coche").executeUpdate();
+        em.createQuery("DELETE FROM Equipamiento").executeUpdate();
+        em.createQuery("DELETE FROM Mecanico").executeUpdate();
+        em.createQuery("DELETE FROM Propietario").executeUpdate();
+        em.createQuery("DELETE FROM Concesionario").executeUpdate();
+    }
+
     private void plantillaDatos() {
 
         Concesionario concesionario = new Concesionario("Concesionario Central", "Av. Principal 1");

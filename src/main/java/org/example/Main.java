@@ -6,6 +6,6 @@ public class Main {
     public static void main(String[] args) {
         Gestor_Concesionario g = new Gestor_Concesionario();
 
-        g.IniciarEntityManager();
+        g.gestionStock(2);
     }
 }

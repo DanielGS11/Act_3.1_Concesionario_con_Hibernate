@@ -33,12 +33,10 @@ public class Reparacion {
         this.mecanico = mecanico;
     }
 
+    public Reparacion() {}
+
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDate getFecha() {

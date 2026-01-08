@@ -39,12 +39,11 @@ public class Coche {
         this.precio_base = precio_base;
     }
 
-    public String getMatricula() {
-        return matricula;
+    public Coche() {
     }
 
-    public void setMatricula(String matricula) {
-        this.matricula = matricula;
+    public String getMatricula() {
+        return matricula;
     }
 
     public String getMarca() {

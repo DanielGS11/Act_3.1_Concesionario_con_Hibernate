@@ -8,10 +8,10 @@
 --- Varios Propietarios.
 --- Varios Coches.
 
-[] Gestión de Stock (Altas)
--- [] Alta de Concesionario: Pide nombre y dirección para crear punto de venta.
+[X] Gestión de Stock (Altas)
+-- [X] Alta de Concesionario: Pide nombre y dirección para crear punto de venta.
 
--- [] Alta de Coche: Registra un nuevo vehículo en el stock.
+-- [X] Alta de Coche: Registra un nuevo vehículo en el stock.
 --- Pedir la Matrícula (que será su identificador único).
 --- Pedir marca, modelo y precio base.
 --- Solicitar ID de un Concesionario existente para asociarlo (Relación N:1).

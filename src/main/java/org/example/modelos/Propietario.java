@@ -28,12 +28,10 @@ public class Propietario {
         this.dni = dni;
     }
 
+    public Propietario() {}
+
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getDni() {
