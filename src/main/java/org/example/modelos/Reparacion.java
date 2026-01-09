@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Reparacion")
+@NamedQuery(
+        name = "Reparacion.buscarPorID",
+        query = "SELECT r FROM Reparacion r WHERE id = :id"
+)
 public class Reparacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

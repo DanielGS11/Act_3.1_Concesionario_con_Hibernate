@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "Equipamiento")
+@NamedQuery(
+        name = "Equipamiento.buscarPorID",
+        query = "SELECT e FROM Equipamiento e WHERE id = :id"
+)
 public class Equipamiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,7 +18,7 @@ public class Equipamiento {
     private double coste;
 
     @ManyToMany(mappedBy = "equipamientos")
-    private List<Coche> coches;
+    public List<Coche> coches;
 
     public Equipamiento(String nombre, double coste) {
         this.nombre = nombre;

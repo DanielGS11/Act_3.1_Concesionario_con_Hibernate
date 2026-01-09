@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Propietario")
+@NamedQuery(
+        name = "Propietario.buscarPropietario",
+        query = "SELECT p FROM Propietario p WHERE dni = :dni AND nombre = :nombre"
+)
 public class Propietario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +21,10 @@ public class Propietario {
     private String nombre;
 
     @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Coche> coches = new ArrayList<>();
+    public List<Coche> coches = new ArrayList<>();
 
     @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Venta> ventas = new ArrayList<>();
+    public List<Venta> ventas = new ArrayList<>();
 
     public Propietario(String nombre, String dni) {
         this.nombre = nombre;

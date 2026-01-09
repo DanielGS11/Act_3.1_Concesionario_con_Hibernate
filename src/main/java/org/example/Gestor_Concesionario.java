@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import org.example.modelos.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
-import java.util.Set;
 
 public class Gestor_Concesionario {
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("concesionarioHibernate");
@@ -77,7 +75,7 @@ public class Gestor_Concesionario {
                 Coche coche = new Coche(matricula, marca, model, precioBase);
 
                 try {
-                    Query q = em.createQuery("Select c FROM Concesionario c WHERE c.id = :id");
+                    Query q = em.createNamedQuery("Concesionario.buscarPorID");
                     q.setParameter("id", idConcesionario);
 
                     Concesionario c = (Concesionario) q.getSingleResult();
@@ -109,11 +107,11 @@ public class Gestor_Concesionario {
         switch (opc) {
             case 1:
                 try {
-                    System.out.println("Vamos a añadir un equpamiento a un coche");
+                    System.out.println("Vamos a hacer una reparacion a un coche");
                     System.out.print("Introduzca la matricula del coche: ");
                     String matricula = sc.nextLine().toUpperCase();
 
-                    Query q = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula");
+                    Query q = em.createNamedQuery("Coche.buscarPorMatricula");
                     q.setParameter("matricula", matricula);
 
                     Coche coche = (Coche) q.getSingleResult();
@@ -122,7 +120,7 @@ public class Gestor_Concesionario {
                         System.out.print("Introduzca la ID del equipamiento a añadir: ");
                         String id = sc.nextLine();
 
-                        q = em.createQuery("SELECT e FROM Equipamiento e WHERE e.id = :id");
+                        q = em.createNamedQuery("Equipamiento.buscarPorID");
                         q.setParameter("id", id);
 
                         Equipamiento equipamiento = (Equipamiento) q.getSingleResult();
@@ -131,7 +129,7 @@ public class Gestor_Concesionario {
                             System.out.println("El coche ya tenia el equipamiento " + equipamiento.getNombre());
 
                         } else {
-                            coche.getEquipamientos().add(equipamiento);
+                            coche.equipamientos.add(equipamiento);
 
                             coche.setPrecio_base(coche.getPrecio_base() + equipamiento.getCoste());
 
@@ -150,12 +148,148 @@ public class Gestor_Concesionario {
                 break;
 
             case 2:
+                try {
+                    System.out.println("Vamos a hacer una reparacion a un coche");
+                    System.out.print("Introduzca la matricula del coche: ");
+                    String matricula = sc.nextLine().toUpperCase();
 
+                    Query q = em.createNamedQuery("Coche.buscarPorMatricula");
+                    q.setParameter("matricula", matricula);
+
+                    Coche coche = (Coche) q.getSingleResult();
+
+                    try {
+                        System.out.print("Introduzca la ID del mecanico que hizo la reparacion: ");
+                        String id = sc.nextLine();
+
+                        q = em.createNamedQuery("Mecanico.buscarPorID");
+                        q.setParameter("id", id);
+
+                        Mecanico mecanico = (Mecanico) q.getSingleResult();
+
+                        System.out.print("Introduzca la fecha en la que se realizo la reparacion (DD-MM-YYYY): ");
+                        String fechaReparacion = sc.nextLine();
+
+                        System.out.print("Introduzca el coste de la reparacion: ");
+                        double coste = Double.parseDouble(sc.nextLine());
+
+                        System.out.print("Aporta una breve descripcion de la reparacion: ");
+                        String descripcion = sc.nextLine();
+
+                        Reparacion reparacion = new Reparacion(LocalDate.parse(fechaReparacion, DateTimeFormatter.ofPattern("dd-MM-yyyy")), coste, descripcion, coche, mecanico);
+
+                        coche.reparaciones.add(reparacion);
+
+                        mecanico.reparaciones.add(reparacion);
+
+                        em.merge(coche);
+                        em.merge(mecanico);
+                        em.persist(reparacion);
+
+                        em.getTransaction().commit();
+                    } catch (NoResultException e) {
+                        System.out.println("No existe un mecanico con ese ID");
+                    }
+                } catch (NoResultException e) {
+                    System.out.println("No existe un coche con esa matricula");
+                }
                 break;
 
             default:
                 System.out.println("Por favor, introduzca la opcion correcta");
                 break;
+        }
+    }
+
+    public void venta() {
+        abrirConexion();
+
+        try {
+            Scanner sc = new Scanner(System.in);
+
+            System.out.println("Introduzca los siguientes datos que se piden para la venta");
+            System.out.print("DNI del nuevo Propietario: ");
+            String dni = sc.nextLine().toUpperCase();
+
+            System.out.print("Nombre del nuevo Propietario: ");
+            String name = sc.nextLine();
+            name = name.toUpperCase().charAt(0) + name.toLowerCase().substring(1, name.length());
+
+            System.out.print("Matricula del Coche a vender: ");
+            String matricula = sc.nextLine().toUpperCase();
+
+            System.out.print("ID del Concesionario: ");
+            long idConcesionario = Integer.parseInt(sc.nextLine());
+
+            Query q = em.createNamedQuery("Coche.buscarPorMatricula");
+            q.setParameter("matricula", matricula);
+
+            Coche coche = (Coche) q.getSingleResult();
+
+            try {
+                if (coche.getPropietario() != null) {
+                    if (coche.getPropietario().getDni().equals(dni)) {
+                        System.out.println("Este propietario ya tiene ese coche");
+
+                    } else {
+                        System.out.println("El coche ya esta vendido");
+
+                    }
+                } else if (!coche.getConcesionario().getId().equals(idConcesionario)) {
+                    System.out.println("El coche no pertenece a ese concesionario");
+
+                } else {
+                    q = em.createNamedQuery("Propietario.buscarPropietario");
+                    q.setParameter("dni", dni);
+                    q.setParameter("nombre", name);
+
+                    Propietario propietario = (Propietario) q.getSingleResult();
+
+                    q = em.createNamedQuery("Concesionario.buscarPorID");
+                    q.setParameter("id", idConcesionario);
+
+                    Concesionario concesionario = (Concesionario) q.getSingleResult();
+
+                    Venta venta = new Venta(LocalDate.now(), coche.getPrecio_base(), concesionario, propietario, coche);
+
+                    concesionario.coches.remove(coche);
+                    concesionario.ventas.add(venta);
+                    propietario.coches.add(coche);
+                    propietario.ventas.add(venta);
+                    coche.setPropietario(propietario);
+
+                    em.merge(concesionario);
+                    em.merge(propietario);
+                    em.merge(coche);
+
+                    em.persist(venta);
+
+                    em.getTransaction().commit();
+                }
+            } catch (RuntimeException e) {
+                em.getTransaction().rollback();
+
+                System.out.println("La operacion fue cancelada. Error: " + e.getMessage());
+            }
+        } catch (NoResultException e) {
+            System.out.println("No se encontro el coche");
+        }
+    }
+
+    public void stockConcesionario(int id) {
+abrirConexion();
+
+        try {
+            Query q = em.createNamedQuery("Concesionario.buscarPorID");
+            q.setParameter("id", id);
+
+            Concesionario concesionario = (Concesionario) q.getSingleResult();
+
+            System.out.println("Coches sin vender del consesionario con ID: " + id);
+            concesionario.coches.stream().filter(c -> c.getPropietario() == null).forEach(System.out::println);
+
+        } catch (NoResultException e) {
+            System.out.println("No existe un concesionario con esa ID");
         }
     }
 
@@ -188,6 +322,7 @@ public class Gestor_Concesionario {
     private void plantillaDatos() {
 
         Concesionario concesionario = new Concesionario("Concesionario Central", "Av. Principal 1");
+        Concesionario concesionario2 = new Concesionario("Concesionario Central 2", "Av. Principal 2");
 
         Equipamiento aire = new Equipamiento("Aire Acondicionado", 500);
         Equipamiento gps = new Equipamiento("GPS", 300);
@@ -195,30 +330,27 @@ public class Gestor_Concesionario {
         Mecanico mecanico1 = new Mecanico("Carlos", "Motor");
         Mecanico mecanico2 = new Mecanico("Luis", "Electricidad");
 
-        Propietario p1 = new Propietario("12345678A", "Juan Pérez");
-        Propietario p2 = new Propietario("87654321B", "Ana López");
+        Propietario p1 = new Propietario("Juan Pérez", "12345678A");
+        Propietario p2 = new Propietario("Ana López", "87654321B");
 
         Coche coche1 = new Coche("1234ABC", "Toyota", "Corolla", 20000);
         Coche coche2 = new Coche("5678DEF", "Seat", "Ibiza", 15000);
+        Coche coche3 = new Coche("4321DEF", "Seat", "Leon", 17500);
 
-        coche1.setEquipamientos(Set.of(aire, gps));
-        coche2.setConcesionario(concesionario);
-        coche2.setPropietario(p2);
-
-        Reparacion r1 = new Reparacion(LocalDate.now(), 250, "Cambio de aceite", coche1, mecanico1);
-
-        Venta v1 = new Venta(LocalDate.now(), 21000.0, concesionario, p1, coche1);
+        coche1.setConcesionario(concesionario);
+        coche2.setConcesionario(concesionario2);
+        coche3.setConcesionario(concesionario);
 
         em.persist(concesionario);
+        em.persist(concesionario2);
         em.persist(p1);
         em.persist(p2);
         em.persist(coche1);
         em.persist(coche2);
+        em.persist(coche3);
         em.persist(aire);
         em.persist(gps);
         em.persist(mecanico1);
         em.persist(mecanico2);
-        em.persist(v1);
-        em.persist(r1);
     }
 }

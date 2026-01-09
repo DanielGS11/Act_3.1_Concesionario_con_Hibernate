@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "Coche")
+@NamedQuery(
+        name = "Coche.buscarPorMatricula",
+        query = "SELECT c FROM Coche c WHERE matricula = :matricula"
+)
 public class Coche {
     @Id
     @Column(length = 20, unique = true)
@@ -24,6 +27,9 @@ public class Coche {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propietario_id")
     private Propietario propietario;
+
+    @OneToMany(mappedBy = "coche")
+    public List<Reparacion> reparaciones;
 
     @ManyToMany
     @JoinTable(
@@ -93,5 +99,19 @@ public class Coche {
 
     public void setEquipamientos(Set<Equipamiento> equipamientos) {
         this.equipamientos = equipamientos;
+    }
+
+    public List<Reparacion> getReparaciones() {
+        return reparaciones;
+    }
+
+    public void setReparaciones(List<Reparacion> reparaciones) {
+        this.reparaciones = reparaciones;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Matricula: %s\nMarca: %s\nModelo: %s\nPrecio Base: %.2f\nEquipamientos: %s",
+                matricula, marca, modelo, precio_base, equipamientos);
     }
 }

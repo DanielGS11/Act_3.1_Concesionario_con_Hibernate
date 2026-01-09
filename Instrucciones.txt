@@ -16,16 +16,16 @@
 -- Pedir marca, modelo y precio base.
 -- Solicitar ID de un Concesionario existente para asociarlo (Relación N:1).
 
-[] Taller y Equipamiento (Relaciones N:M)
-- [] Instalar Extra: Pide una matrícula de coche y un ID de equipamiento.
+[X] Taller y Equipamiento (Relaciones N:M)
+- [X] Instalar Extra: Pide una matrícula de coche y un ID de equipamiento.
 -- Asocia el equipamiento al coche.
 -- Lógica: Debe mostrar por consola el nuevo precio total del coche (Precio Base + Suma de precios de extras).
 
-- [] Registrar Reparación: Pide matrícula de coche e ID de mecánico.
+- [X] Registrar Reparación: Pide matrícula de coche e ID de mecánico.
 -- Requisito Adicional: Solicitar además la Fecha de reparación, Coste de intervención y breve Descripción (ej. "Cambio de aceite").
 
-[] Ventas (Transacciones y Entidad Venta)
-- [] Vender Coche: Esta es la operación crítica del negocio.
+[X] Ventas (Transacciones y Entidad Venta)
+- Vender Coche: Esta es la operación crítica del negocio.
 -- Pide datos de un nuevo Propietario (DNI, Nombre).
 -- Pide la matrícula del coche a vender y el ID del Concesionario que realiza la venta.
 -- Requisito de Histórico: Generar registro de Venta que guarde fecha actual, precio final pactado, comprador y concesionario vendedor.
