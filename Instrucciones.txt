@@ -32,46 +32,46 @@
 -- Operación Transaccional
 -- Nota: Debe controlarse si el coche no existe o ya está vendido.
 
-[] Consultas e Informes
-- [] Stock de Concesionario: Dado un ID de concesionario, lista todos los coches que están actualmente allí (no vendidos).
+[X] Consultas e Informes
+- [X] Stock de Concesionario: Dado un ID de concesionario, lista todos los coches que están actualmente allí (no vendidos).
 
-- [] Historial de Mecánico: Dado un ID de mecánico, muestra la lista de reparaciones que ha realizado, incluyendo fecha y matrícula del coche.
+- [X] Historial de Mecánico: Dado un ID de mecánico, muestra la lista de reparaciones que ha realizado, incluyendo fecha y matrícula del coche.
 
-- [] Ventas por Concesionario: Listar todas las Ventas realizadas por un Concesionario, mostrando el importe total recaudado.
+- [X] Ventas por Concesionario: Listar todas las Ventas realizadas por un Concesionario, mostrando el importe total recaudado.
 
-- [] Coste actual de Coche: Sólo disponible para Coches con Propietario. Mostrar el coste total invertido en el coche incluyendo precio de compra, reparaciones y extras.
+- [X] Coste actual de Coche: Sólo disponible para Coches con Propietario. Mostrar el coste total invertido en el coche incluyendo precio de compra, reparaciones y extras.
 
 Apreciaciones a tener en cuenta
-[] La base de datos se debe generar desde el código Java con la opción correspondiente del fichero persistence.xml. No se crea manualmente de manera previa en Workbench, ni mediante sentencia DDL en el código Java.
+[X] La base de datos se debe generar desde el código Java con la opción correspondiente del fichero persistence.xml. No se crea manualmente de manera previa en Workbench, ni mediante sentencia DDL en el código Java.
 
-[] Claves Primarias (PK):
+[X] Claves Primarias (PK):
 
-- [] Para Coche, la clave primaria es la Matrícula (String). No existe por lo tanto id numérico en la tabla correspondiente. Debe validarse que la matrícula tenga un formato correcto (4 dígitos seguidos de 3 letras).
+- [X] Para Coche, la clave primaria es la Matrícula (String). No existe por lo tanto id numérico en la tabla correspondiente. Debe validarse que la matrícula tenga un formato correcto (4 dígitos seguidos de 3 letras).
 
-- [] Para el resto (Concesionario, Mecánico, Venta, etc.) se debe usar un id numérico autogenerado.
+- [X] Para el resto (Concesionario, Mecánico, Venta, etc.) se debe usar un id numérico autogenerado.
 
-[] Consultas: Prohibido usar SQL nativo. Todas las consultas del apartado 5 deben realizarse utilizando JPQL (Java Persistence Query Language) sobre los objetos.
+[X] Consultas: Prohibido usar SQL nativo. Todas las consultas del apartado 5 deben realizarse utilizando JPQL (Java Persistence Query Language) sobre los objetos.
 
-[] Relaciones y Entidades Intermedias:
+[X] Relaciones y Entidades Intermedias:
 
-- [] N:M Simple (Coche-Equipamiento): Hibernate genera la tabla intermedia automáticamente (@ManyToMany).
+- [X] N:M Simple (Coche-Equipamiento): Hibernate genera la tabla intermedia automáticamente (@ManyToMany).
 
-- [] N:M Compleja (Coche-Mecanico): Se usa la entidad explícita Reparacion para guardar atributos extra (fecha, coste).
+- [X] N:M Compleja (Coche-Mecanico): Se usa la entidad explícita Reparacion para guardar atributos extra (fecha, coste).
 
-- [] Histórico (Venta): Es una entidad que vincula Concesionario, Propietario y Coche en un momento del tiempo.
+- [X] Histórico (Venta): Es una entidad que vincula Concesionario, Propietario y Coche en un momento del tiempo.
 
-[] Gestión de Recursos: Deben cerrarse los recursos correctamente una vez finaliza su uso.
+[X] Gestión de Recursos: Deben cerrarse los recursos correctamente una vez finaliza su uso.
 
-[] Excepciones: Se deben capturar y gestionar todas las excepciones que puedan ser lanzadas, evitando que el programa se detenga con error fatal.
+[X] Excepciones: Se deben capturar y gestionar todas las excepciones que puedan ser lanzadas, evitando que el programa se detenga con error fatal.
 
 Requisitos Técnicos
-[] Cero SQL Manual: Prohibido usar INSERT, CREATE o SELECT nativo. Todo debe ser gestionado por el ORM.
+[X] Cero SQL Manual: Prohibido usar INSERT, CREATE o SELECT nativo. Todo debe ser gestionado por el ORM.
 
-[] Configuración Externa: La conexión a BBDD debe estar definida en el fichero src/main/resources/META-INF/persistence.xml.
+[X] Configuración Externa: La conexión a BBDD debe estar definida en el fichero src/main/resources/META-INF/persistence.xml.
 
-[] Anotaciones: Uso correcto de @Entity, @OneToOne (si aplica), @ManyToOne, @ManyToMany y @OneToMany.
+[X] Anotaciones: Uso correcto de @Entity, @OneToOne (si aplica), @ManyToOne, @ManyToMany y @OneToMany.
 
-[] Librerías: Uso de Maven para la gestión de dependencias (Hibernate Core + MySQL Connector).
+[X] Librerías: Uso de Maven para la gestión de dependencias (Hibernate Core + MySQL Connector).
 
 
 Entrega

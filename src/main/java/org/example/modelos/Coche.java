@@ -39,11 +39,12 @@ public class Coche {
     )
     public Set<Equipamiento> equipamientos;
 
-    public Coche(String matricula, String marca, String modelo, double precio_base) {
+    public Coche(String matricula, String marca, String modelo, double precio_base, Concesionario concesionario) {
         this.matricula = matricula;
         this.marca = marca;
         this.modelo = modelo;
         this.precio_base = precio_base;
+        this.concesionario = concesionario;
     }
 
     public Coche() {
@@ -111,7 +112,7 @@ public class Coche {
 
     @Override
     public String toString() {
-        return String.format("Matricula: %s\nMarca: %s\nModelo: %s\nPrecio Base: %.2f\nEquipamientos: %s",
+        return String.format("Matricula: %s\nMarca: %s\nModelo: %s\nPrecio Base: %.2f\nEquipamientos: %s\n",
                 matricula, marca, modelo, precio_base, equipamientos);
     }
 }

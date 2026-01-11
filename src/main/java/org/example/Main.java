@@ -6,8 +6,6 @@ public class Main {
     public static void main(String[] args) {
         Gestor_Concesionario g = new Gestor_Concesionario();
 
-        //g.iniciarEntityManager();
-
-        g.stockConcesionario(1);
+        g.iniciarEntityManager();
     }
 }

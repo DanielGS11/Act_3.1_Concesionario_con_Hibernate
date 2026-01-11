@@ -81,4 +81,10 @@ public class Reparacion {
     public void setMecanico(Mecanico mecanico) {
         this.mecanico = mecanico;
     }
+
+    @Override
+    public String toString() {
+        return String.format("ID: %d\nFecha: %s\nMatricula del Coche Reparado: %s\nCoste: %.2f\nDescripcion de la Reparacion: %s\n",
+                id, fecha, coche.getMatricula(), coste, descripcion);
+    }
 }

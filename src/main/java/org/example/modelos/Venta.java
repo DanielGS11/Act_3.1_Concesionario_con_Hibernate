@@ -82,4 +82,10 @@ public class Venta {
     public void setCoche(Coche coche) {
         this.coche = coche;
     }
+
+    @Override
+    public String toString() {
+        return String.format("ID: %d\nFecha: %s\nMatricula del coche: %s\nPrecio: %.2f\nDNI del Comprador: %s\n",
+                id, fecha, coche.getMatricula(), precio_final, propietario.getDni());
+    }
 }

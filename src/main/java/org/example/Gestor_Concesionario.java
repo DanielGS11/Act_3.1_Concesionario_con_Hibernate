@@ -5,19 +5,20 @@ import org.example.modelos.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Gestor_Concesionario {
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("concesionarioHibernate");
     private final EntityManager em = emf.createEntityManager();
+    private boolean conectado = false;
 
     public void iniciarEntityManager() {
-        if (!em.getTransaction().isActive()) {
-            abrirConexion();
-        }
+        abrirConexion();
 
         try {
-
             limpiarTablas();
 
             plantillaDatos();
@@ -25,6 +26,7 @@ public class Gestor_Concesionario {
             em.getTransaction().commit();
 
             System.out.println("Datos Iniciales cargados con exito");
+
 
         } catch (RuntimeException e) {
             if (em.getTransaction().isActive()) {
@@ -34,6 +36,8 @@ public class Gestor_Concesionario {
             System.out.println("Carga de datos cancelada con exito");
             System.out.println(e.getMessage());
 
+        } finally {
+            em.clear();
         }
     }
 
@@ -54,6 +58,8 @@ public class Gestor_Concesionario {
                 em.persist(concesionario);
 
                 em.getTransaction().commit();
+
+                em.clear();
                 break;
 
             case 2:
@@ -72,15 +78,13 @@ public class Gestor_Concesionario {
                 System.out.print("Introduzca la ID del concesionario al que pertenece coche: ");
                 int idConcesionario = Integer.parseInt(sc.nextLine());
 
-                Coche coche = new Coche(matricula, marca, model, precioBase);
-
                 try {
-                    Query q = em.createNamedQuery("Concesionario.buscarPorID");
+                    TypedQuery<Concesionario> q = em.createNamedQuery("Concesionario.buscarPorID", Concesionario.class);
                     q.setParameter("id", idConcesionario);
 
-                    Concesionario c = (Concesionario) q.getSingleResult();
+                    Concesionario c = q.getSingleResult();
 
-                    coche.setConcesionario(c);
+                    Coche coche = new Coche(matricula, marca, model, precioBase, c);
 
                     em.persist(coche);
 
@@ -91,6 +95,8 @@ public class Gestor_Concesionario {
                     }
                 } catch (NoResultException e) {
                     System.out.println("La ID del concesionario no existe");
+                } finally {
+                    em.clear();
                 }
                 break;
 
@@ -107,7 +113,7 @@ public class Gestor_Concesionario {
         switch (opc) {
             case 1:
                 try {
-                    System.out.println("Vamos a hacer una reparacion a un coche");
+                    System.out.println("Vamos a instalar un extra a un coche");
                     System.out.print("Introduzca la matricula del coche: ");
                     String matricula = sc.nextLine().toUpperCase();
 
@@ -131,9 +137,13 @@ public class Gestor_Concesionario {
                         } else {
                             coche.equipamientos.add(equipamiento);
 
-                            coche.setPrecio_base(coche.getPrecio_base() + equipamiento.getCoste());
+                            AtomicReference<Double> costeActual = new AtomicReference<>(coche.getPrecio_base());
 
-                            System.out.println("Precio Actual del coche: " + coche.getPrecio_base());
+                            coche.equipamientos.forEach(e ->
+                                    costeActual.getAndSet(costeActual.get() + e.getCoste())
+                            );
+
+                            System.out.println("Precio Actual del coche: " + costeActual.get());
 
                             em.merge(coche);
 
@@ -144,6 +154,8 @@ public class Gestor_Concesionario {
                     }
                 } catch (NoResultException e) {
                     System.out.println("No existe un coche con esa matricula");
+                } finally {
+                    em.clear();
                 }
                 break;
 
@@ -192,6 +204,8 @@ public class Gestor_Concesionario {
                     }
                 } catch (NoResultException e) {
                     System.out.println("No existe un coche con esa matricula");
+                } finally {
+                    em.clear();
                 }
                 break;
 
@@ -273,39 +287,135 @@ public class Gestor_Concesionario {
             }
         } catch (NoResultException e) {
             System.out.println("No se encontro el coche");
+        } finally {
+            em.clear();
         }
     }
 
     public void stockConcesionario(int id) {
-abrirConexion();
+        abrirConexion();
 
         try {
-            Query q = em.createNamedQuery("Concesionario.buscarPorID");
+            TypedQuery<Concesionario> q = em.createNamedQuery("Concesionario.buscarPorID", Concesionario.class);
             q.setParameter("id", id);
 
-            Concesionario concesionario = (Concesionario) q.getSingleResult();
+            Concesionario concesionario = q.getSingleResult();
 
             System.out.println("Coches sin vender del consesionario con ID: " + id);
             concesionario.coches.stream().filter(c -> c.getPropietario() == null).forEach(System.out::println);
 
         } catch (NoResultException e) {
             System.out.println("No existe un concesionario con esa ID");
+        } finally {
+            em.getTransaction().rollback();
+            em.clear();
         }
+    }
+
+    public void historialMecanico(int id) {
+        abrirConexion();
+
+        try {
+            TypedQuery<Mecanico> q = em.createNamedQuery("Mecanico.buscarPorID", Mecanico.class);
+            q.setParameter("id", id);
+
+            Mecanico mecanico = q.getSingleResult();
+
+            System.out.println("Reparaciones realizadas por el Mecanico con ID: " + id);
+            mecanico.reparaciones.forEach(System.out::println);
+
+        } catch (NoResultException e) {
+            System.out.println("No existe un Mecanico con esa ID");
+        } finally {
+            em.getTransaction().rollback();
+            em.clear();
+        }
+    }
+
+    public void ventasConcesionario(int id) {
+        abrirConexion();
+
+        try {
+            TypedQuery<Concesionario> q = em.createNamedQuery("Concesionario.buscarPorID", Concesionario.class);
+            q.setParameter("id", id);
+
+            Concesionario concesionario = q.getSingleResult();
+
+            System.out.println("Ventas del consesionario con ID: " + id);
+            AtomicReference<Double> totalRecaudado = new AtomicReference<Double>(0.0);
+
+            concesionario.ventas.forEach(venta -> {
+                totalRecaudado.getAndSet(totalRecaudado.get() + venta.getPrecio_final());
+
+                System.out.println(venta);
+            });
+
+            System.out.println("Total Recaudado: " + totalRecaudado.get());
+
+        } catch (NoResultException e) {
+            System.out.println("No existe un concesionario con esa ID");
+        } finally {
+            em.getTransaction().rollback();
+            em.clear();
+        }
+    }
+
+    public void costeCoche(String matricula) {
+        abrirConexion();
+
+        try {
+            TypedQuery<Coche> q = em.createNamedQuery("Coche.buscarPorMatricula", Coche.class);
+            q.setParameter("matricula", matricula);
+
+            Coche coche = q.getSingleResult();
+
+            if (coche.getPropietario() == null) {
+                System.out.println("Este coche no tiene un propietario, no se puede calcular su precio actual");
+                return;
+            }
+
+            AtomicReference<Double> costeActual = new AtomicReference<>(coche.getPrecio_base());
+
+            if (coche.equipamientos != null) {
+                coche.equipamientos.forEach(e ->
+                        costeActual.getAndSet(costeActual.get() + e.getCoste())
+                );
+            }
+
+            if (coche.reparaciones != null) {
+                coche.reparaciones.forEach(reparacion ->
+                        costeActual.getAndSet(costeActual.get() + reparacion.getCoste())
+                );
+            }
+
+            System.out.printf("Coste actual del Coche con matricula %s (precio del coche, reparaciones y extras): %.2f ", matricula, costeActual.get());
+
+        } catch (NoResultException e) {
+            System.out.println("No existe un coche con esa Matricula");
+        } finally {
+            em.getTransaction().rollback();
+            em.clear();
+        }
+    }
+
+    public void salir() {
+        System.out.println("Adios");
+
+        em.close();
     }
 
     //----------------------------------------------- METODOS AUXILIARES -----------------------------------------------
     private void abrirConexion() {
         if (!em.getTransaction().isActive()) {
-            try {
+            if (!conectado) {
                 System.out.println("Conectando a la base de datos...");
-                Thread.sleep(0000);
 
-                em.getTransaction().begin();
+                conectado = true;
 
                 System.out.println("Conexion Establecida");
-            } catch (InterruptedException e) {
-                System.out.println("Error: " + e.getMessage());
             }
+
+            em.getTransaction().begin();
         }
     }
 
@@ -333,13 +443,22 @@ abrirConexion();
         Propietario p1 = new Propietario("Juan Pérez", "12345678A");
         Propietario p2 = new Propietario("Ana López", "87654321B");
 
-        Coche coche1 = new Coche("1234ABC", "Toyota", "Corolla", 20000);
-        Coche coche2 = new Coche("5678DEF", "Seat", "Ibiza", 15000);
-        Coche coche3 = new Coche("4321DEF", "Seat", "Leon", 17500);
+        Coche coche1 = new Coche("1234ABC", "Toyota", "Corolla", 20000, concesionario);
+        Coche coche2 = new Coche("5678DEF", "Seat", "Ibiza", 15000, concesionario2);
+        Coche coche3 = new Coche("4321DEF", "Seat", "Leon", 17500, concesionario);
 
-        coche1.setConcesionario(concesionario);
-        coche2.setConcesionario(concesionario2);
-        coche3.setConcesionario(concesionario);
+        coche1.setPropietario(p1);
+        coche3.setPropietario(p2);
+
+
+        Reparacion r1 = new Reparacion(LocalDate.now(), 200, "Cambio de Agua", coche1, mecanico1);
+        Reparacion r2 = new Reparacion(LocalDate.now(), 500, "Cambio de Aceite", coche2, mecanico1);
+        Venta v1 = new Venta(LocalDate.now(), 1500.0, concesionario, p1, coche1);
+        Venta v2 = new Venta(LocalDate.now(), 2500.0, concesionario, p2, coche2);
+        em.persist(r1);
+        em.persist(r2);
+        em.persist(v1);
+        em.persist(v2);
 
         em.persist(concesionario);
         em.persist(concesionario2);
