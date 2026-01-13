@@ -20,10 +20,10 @@ public class Propietario {
 
     private String nombre;
 
-    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "propietario")
     public List<Coche> coches = new ArrayList<>();
 
-    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "propietario")
     public List<Venta> ventas = new ArrayList<>();
 
     public Propietario(String nombre, String dni) {

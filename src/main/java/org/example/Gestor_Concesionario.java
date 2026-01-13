@@ -5,9 +5,7 @@ import org.example.modelos.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Gestor_Concesionario {
@@ -15,7 +13,7 @@ public class Gestor_Concesionario {
     private final EntityManager em = emf.createEntityManager();
     private boolean conectado = false;
 
-    public void iniciarEntityManager() {
+    public void cargarDatosIniciales() {
         abrirConexion();
 
         try {
@@ -37,6 +35,8 @@ public class Gestor_Concesionario {
             System.out.println(e.getMessage());
 
         } finally {
+            esperar1Segundo();
+
             em.clear();
         }
     }
@@ -59,12 +59,18 @@ public class Gestor_Concesionario {
 
                 em.getTransaction().commit();
 
+                System.out.println("Concesionario registrado con exito");
+
                 em.clear();
                 break;
 
             case 2:
                 System.out.print("Introduzca la matricula del coche: ");
                 String matricula = sc.nextLine().toUpperCase();
+
+                if (!comprobarMatricula(matricula)) {
+                    return;
+                }
 
                 System.out.print("Introduzca el modelo del coche: ");
                 String model = sc.nextLine();
@@ -90,6 +96,9 @@ public class Gestor_Concesionario {
 
                     try {
                         em.getTransaction().commit();
+
+                        System.out.println("Coche registrado con exito");
+
                     } catch (RuntimeException e) {
                         System.out.printf("El coche con matricula %s ya existe\n", matricula);
                     }
@@ -101,9 +110,10 @@ public class Gestor_Concesionario {
                 break;
 
             default:
-                System.out.println("Por favor, introduzca la opcion correcta");
+                System.out.println("Por favor, introduzca la opcion correcta (1 o 2)");
                 break;
         }
+        esperar1Segundo();
     }
 
     public void taller(int opc) {
@@ -116,6 +126,10 @@ public class Gestor_Concesionario {
                     System.out.println("Vamos a instalar un extra a un coche");
                     System.out.print("Introduzca la matricula del coche: ");
                     String matricula = sc.nextLine().toUpperCase();
+
+                    if (!comprobarMatricula(matricula)) {
+                        return;
+                    }
 
                     Query q = em.createNamedQuery("Coche.buscarPorMatricula");
                     q.setParameter("matricula", matricula);
@@ -143,6 +157,8 @@ public class Gestor_Concesionario {
                                     costeActual.getAndSet(costeActual.get() + e.getCoste())
                             );
 
+                            System.out.println("Instalacion de extra realizada con exito");
+
                             System.out.println("Precio Actual del coche: " + costeActual.get());
 
                             em.merge(coche);
@@ -164,6 +180,10 @@ public class Gestor_Concesionario {
                     System.out.println("Vamos a hacer una reparacion a un coche");
                     System.out.print("Introduzca la matricula del coche: ");
                     String matricula = sc.nextLine().toUpperCase();
+
+                    if (!comprobarMatricula(matricula)) {
+                        return;
+                    }
 
                     Query q = em.createNamedQuery("Coche.buscarPorMatricula");
                     q.setParameter("matricula", matricula);
@@ -199,6 +219,8 @@ public class Gestor_Concesionario {
                         em.persist(reparacion);
 
                         em.getTransaction().commit();
+
+                        System.out.println("Reparacion realizada con exito");
                     } catch (NoResultException e) {
                         System.out.println("No existe un mecanico con ese ID");
                     }
@@ -210,9 +232,10 @@ public class Gestor_Concesionario {
                 break;
 
             default:
-                System.out.println("Por favor, introduzca la opcion correcta");
+                System.out.println("Por favor, introduzca la opcion correcta (1 o 2)");
                 break;
         }
+        esperar1Segundo();
     }
 
     public void venta() {
@@ -232,6 +255,10 @@ public class Gestor_Concesionario {
             System.out.print("Matricula del Coche a vender: ");
             String matricula = sc.nextLine().toUpperCase();
 
+            if (!comprobarMatricula(matricula)) {
+                return;
+            }
+
             System.out.print("ID del Concesionario: ");
             long idConcesionario = Integer.parseInt(sc.nextLine());
 
@@ -241,53 +268,62 @@ public class Gestor_Concesionario {
             Coche coche = (Coche) q.getSingleResult();
 
             try {
-                if (coche.getPropietario() != null) {
-                    if (coche.getPropietario().getDni().equals(dni)) {
-                        System.out.println("Este propietario ya tiene ese coche");
+                q = em.createNamedQuery("Propietario.buscarPropietario");
+                q.setParameter("dni", dni);
+                q.setParameter("nombre", name);
+
+                Propietario propietario = (Propietario) q.getSingleResult();
+
+                try {
+                    if (coche.getPropietario() != null) {
+                        if (coche.getPropietario().getDni().equals(dni)) {
+                            System.out.println("Este propietario ya tiene ese coche");
+
+                        } else {
+                            System.out.println("El coche ya esta vendido");
+
+                        }
+                    } else if (!coche.getConcesionario().getId().equals(idConcesionario)) {
+                        System.out.println("El coche no pertenece a ese concesionario");
 
                     } else {
-                        System.out.println("El coche ya esta vendido");
+                        q = em.createNamedQuery("Concesionario.buscarPorID");
+                        q.setParameter("id", idConcesionario);
 
+                        Concesionario concesionario = (Concesionario) q.getSingleResult();
+
+                        Venta venta = new Venta(LocalDate.now(), coche.getPrecio_base(), concesionario, propietario, coche);
+
+                        coche.setPropietario(propietario);
+                        concesionario.ventas.add(venta);
+                        propietario.coches.add(coche);
+                        propietario.ventas.add(venta);
+
+                        em.merge(concesionario);
+                        em.merge(propietario);
+                        em.merge(coche);
+
+                        em.persist(venta);
+
+                        em.getTransaction().commit();
+
+                        System.out.println("Venta realizada con exito");
                     }
-                } else if (!coche.getConcesionario().getId().equals(idConcesionario)) {
-                    System.out.println("El coche no pertenece a ese concesionario");
+                } catch (RuntimeException e) {
+                    em.getTransaction().rollback();
 
-                } else {
-                    q = em.createNamedQuery("Propietario.buscarPropietario");
-                    q.setParameter("dni", dni);
-                    q.setParameter("nombre", name);
-
-                    Propietario propietario = (Propietario) q.getSingleResult();
-
-                    q = em.createNamedQuery("Concesionario.buscarPorID");
-                    q.setParameter("id", idConcesionario);
-
-                    Concesionario concesionario = (Concesionario) q.getSingleResult();
-
-                    Venta venta = new Venta(LocalDate.now(), coche.getPrecio_base(), concesionario, propietario, coche);
-
-                    concesionario.coches.remove(coche);
-                    concesionario.ventas.add(venta);
-                    propietario.coches.add(coche);
-                    propietario.ventas.add(venta);
-                    coche.setPropietario(propietario);
-
-                    em.merge(concesionario);
-                    em.merge(propietario);
-                    em.merge(coche);
-
-                    em.persist(venta);
-
-                    em.getTransaction().commit();
+                    System.out.println("La operacion fue cancelada. Error: " + e.getMessage());
                 }
             } catch (RuntimeException e) {
                 em.getTransaction().rollback();
 
-                System.out.println("La operacion fue cancelada. Error: " + e.getMessage());
+                System.out.println("No existe un Propietario con esos datos");
             }
         } catch (NoResultException e) {
             System.out.println("No se encontro el coche");
         } finally {
+            esperar1Segundo();
+
             em.clear();
         }
     }
@@ -307,6 +343,8 @@ public class Gestor_Concesionario {
         } catch (NoResultException e) {
             System.out.println("No existe un concesionario con esa ID");
         } finally {
+            esperar1Segundo();
+
             em.getTransaction().rollback();
             em.clear();
         }
@@ -327,6 +365,8 @@ public class Gestor_Concesionario {
         } catch (NoResultException e) {
             System.out.println("No existe un Mecanico con esa ID");
         } finally {
+            esperar1Segundo();
+
             em.getTransaction().rollback();
             em.clear();
         }
@@ -355,12 +395,18 @@ public class Gestor_Concesionario {
         } catch (NoResultException e) {
             System.out.println("No existe un concesionario con esa ID");
         } finally {
+            esperar1Segundo();
+
             em.getTransaction().rollback();
             em.clear();
         }
     }
 
     public void costeCoche(String matricula) {
+        if (!comprobarMatricula(matricula)) {
+            return;
+        }
+
         abrirConexion();
 
         try {
@@ -374,25 +420,22 @@ public class Gestor_Concesionario {
                 return;
             }
 
-            AtomicReference<Double> costeActual = new AtomicReference<>(coche.getPrecio_base());
+             TypedQuery<Double> qCoste = em.createQuery("SELECT SUM(v.precio_final " +
+                    "+ (SELECT SUM(e.coste) FROM Coche c JOIN c.equipamientos e WHERE c.matricula = :matricula) " +
+                    "+ (SELECT SUM(r.coste) FROM Reparacion r WHERE r.coche.matricula = :matricula)) " +
+                    "FROM Venta v WHERE v.coche.matricula = :matricula", Double.class);
 
-            if (coche.equipamientos != null) {
-                coche.equipamientos.forEach(e ->
-                        costeActual.getAndSet(costeActual.get() + e.getCoste())
-                );
-            }
+            qCoste.setParameter("matricula", matricula);
 
-            if (coche.reparaciones != null) {
-                coche.reparaciones.forEach(reparacion ->
-                        costeActual.getAndSet(costeActual.get() + reparacion.getCoste())
-                );
-            }
+            double costeActual = qCoste.getSingleResult();
 
-            System.out.printf("Coste actual del Coche con matricula %s (precio del coche, reparaciones y extras): %.2f ", matricula, costeActual.get());
+            System.out.printf("Coste actual del Coche con matricula %s (precio del coche, reparaciones y extras): %.2f\n", matricula, costeActual);
 
         } catch (NoResultException e) {
             System.out.println("No existe un coche con esa Matricula");
         } finally {
+            esperar1Segundo();
+
             em.getTransaction().rollback();
             em.clear();
         }
@@ -405,6 +448,25 @@ public class Gestor_Concesionario {
     }
 
     //----------------------------------------------- METODOS AUXILIARES -----------------------------------------------
+    private void esperar1Segundo() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private boolean comprobarMatricula(String matricula) {
+        if (!matricula.matches("\\b[1-9]{4}[a-zA-Z]{3}\\b")) {
+            System.out.println("Formato de matricula no valido, debe constar de 4 numeros seguidos de 3 letras");
+
+            esperar1Segundo();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private void abrirConexion() {
         if (!em.getTransaction().isActive()) {
             if (!conectado) {
@@ -430,7 +492,6 @@ public class Gestor_Concesionario {
     }
 
     private void plantillaDatos() {
-
         Concesionario concesionario = new Concesionario("Concesionario Central", "Av. Principal 1");
         Concesionario concesionario2 = new Concesionario("Concesionario Central 2", "Av. Principal 2");
 
@@ -446,19 +507,6 @@ public class Gestor_Concesionario {
         Coche coche1 = new Coche("1234ABC", "Toyota", "Corolla", 20000, concesionario);
         Coche coche2 = new Coche("5678DEF", "Seat", "Ibiza", 15000, concesionario2);
         Coche coche3 = new Coche("4321DEF", "Seat", "Leon", 17500, concesionario);
-
-        coche1.setPropietario(p1);
-        coche3.setPropietario(p2);
-
-
-        Reparacion r1 = new Reparacion(LocalDate.now(), 200, "Cambio de Agua", coche1, mecanico1);
-        Reparacion r2 = new Reparacion(LocalDate.now(), 500, "Cambio de Aceite", coche2, mecanico1);
-        Venta v1 = new Venta(LocalDate.now(), 1500.0, concesionario, p1, coche1);
-        Venta v2 = new Venta(LocalDate.now(), 2500.0, concesionario, p2, coche2);
-        em.persist(r1);
-        em.persist(r2);
-        em.persist(v1);
-        em.persist(v2);
 
         em.persist(concesionario);
         em.persist(concesionario2);

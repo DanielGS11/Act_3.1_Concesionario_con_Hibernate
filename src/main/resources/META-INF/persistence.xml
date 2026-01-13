@@ -10,6 +10,7 @@
         <!-- Clase proveedora de la implementación (Hibernate) -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
+        <!-- Modelos que usara -->
         <class>modelos.Coche</class>
         <class>modelos.Concesionario</class>
         <class>modelos.Equipamiento</class>
@@ -21,12 +22,14 @@
         <properties>
             <!-- 1. CONFIGURACIÓN JDBC (CONEXIÓN) -->
             <!-- Cambia 'mibd_ra3' por el nombre de tu base de datos creada en MySQL -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/concesionario_hibernate?createDatabaseIfNotExist=true&amp;serverTimezone=UTC"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/concesionario_hibernate?serverTimezone=UTC"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
             <!-- Pon aquí tu contraseña de MySQL, si no tienes, déjalo vacío -->
             <property name="jakarta.persistence.jdbc.password" value="root"/>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+
+            <!-- Crea las tablas si no estan o las deja si ya existen -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
 
             <!-- 2. CONFIGURACIÓN DE HIBERNATE -->
             <!-- Muestra las consultas SQL en la consola (Muy útil para aprender) -->
