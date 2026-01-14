@@ -77,7 +77,7 @@ public class Main {
 
                 case 8:
                     System.out.print("Introduzca la MATRICULA del Coche a consultar: ");
-                    g.costeCoche(sc.nextLine());
+                    g.costeCoche(sc.nextLine().toUpperCase().trim());
                     break;
 
                 case 9:

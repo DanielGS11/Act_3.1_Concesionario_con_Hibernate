@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+/*
+ Creo una Named Query con la que no tengo que repetir la sentencia SQL cada vez que quiero buscar un objeto de la clase,
+ solo introducir el dato que se pide (que esta despues de ':')
+ */
 @NamedQuery(
         name = "Propietario.buscarPropietario",
         query = "SELECT p FROM Propietario p WHERE dni = :dni AND nombre = :nombre"
@@ -33,39 +37,7 @@ public class Propietario {
 
     public Propietario() {}
 
-    public Long getId() {
-        return id;
-    }
-
     public String getDni() {
         return dni;
-    }
-
-    public void setDni(String dni) {
-        this.dni = dni;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public List<Coche> getCoches() {
-        return coches;
-    }
-
-    public void setCoches(List<Coche> coches) {
-        this.coches = coches;
-    }
-
-    public List<Venta> getVentas() {
-        return ventas;
-    }
-
-    public void setVentas(List<Venta> ventas) {
-        this.ventas = ventas;
     }
 }

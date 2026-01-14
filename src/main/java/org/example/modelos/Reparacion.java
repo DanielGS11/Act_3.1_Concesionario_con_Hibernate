@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@NamedQuery(
-        name = "Reparacion.buscarPorID",
-        query = "SELECT r FROM Reparacion r WHERE id = :id"
-)
 public class Reparacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,50 +33,6 @@ public class Reparacion {
     }
 
     public Reparacion() {}
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public double getCoste() {
-        return coste;
-    }
-
-    public void setCoste(double coste) {
-        this.coste = coste;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public Coche getCoche() {
-        return coche;
-    }
-
-    public void setCoche(Coche coche) {
-        this.coche = coche;
-    }
-
-    public Mecanico getMecanico() {
-        return mecanico;
-    }
-
-    public void setMecanico(Mecanico mecanico) {
-        this.mecanico = mecanico;
-    }
 
     @Override
     public String toString() {

@@ -7,20 +7,12 @@ import java.util.Set;
 
 // Establezco la clase como una entidad (tabla) de la base de datos
 @Entity
-/*
- Creo una Named Query con la que no tengo que repetir la sentencia SQL cada vez que quiero buscar un objeto de la clase,
- solo introducir el dato que se pide (que esta despues de ':')
- */
-@NamedQuery(
-        name = "Coche.buscarPorMatricula",
-        query = "SELECT c FROM Coche c WHERE matricula = :matricula"
-)
 public class Coche {
     // @id es para establecer una primary key (PK)
     @Id
     // Aqui establezco que la PK es unica y, en este caso, no sobrepase los 20 caracteres
     @Column(length = 20, unique = true)
-    //atributo de la PK
+    // atributo de la PK
     private String matricula;
 
     // otros atributos
@@ -43,14 +35,19 @@ public class Coche {
     private Propietario propietario;
 
     /*
-    Relacion 1:N, en este caso, este objeto es el de la 'N' de la relacion, por lo que mapeamos
+    Relacion 1:N, en este caso, este objeto es el de la 'N' (Muchos) de la relacion, por lo que esta clase es la que
+    dara la clave foranea a la otra entidad de la relacion
      */
     @OneToMany(mappedBy = "coche")
     public List<Reparacion> reparaciones;
 
     // Relacion N:M
     @ManyToMany
-    // Asigno el nombre de la tabla de la relacion, el id de la clase coche y el id de la otra clase de la relacion
+    /*
+     Asigno el nombre de la tabla de la relacion, el id de la clase coche y el id de la otra clase de la relacion.
+     Coche sera el padre de esta tabla, Equipamiento no ya que los equipamientos van en los coches, ademas solo 1 de las
+     2 entidades debe ser la dueña de la tabla para evitar 2 tablas
+     */
     @JoinTable(
             name = "coche_equipamiento",
             joinColumns = @JoinColumn(name = "coche_matricula"),
@@ -97,6 +94,6 @@ public class Coche {
     @Override
     public String toString() {
         return String.format("Matricula: %s\nMarca: %s\nModelo: %s\nPrecio Base: %.2f\nEquipamientos: %s\n",
-                matricula, marca, modelo, precio_base, equipamientos);
+                matricula, marca, modelo, precio_base, equipamientos.toString());
     }
 }

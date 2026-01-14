@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@NamedQuery(
-        name = "Venta.buscarPorID",
-        query = "SELECT v FROM Venta v WHERE id = :id"
-)
 public class Venta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,48 +35,8 @@ public class Venta {
 
     public Venta() {}
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
     public Double getPrecio_final() {
         return precio_final;
-    }
-
-    public void setPrecio_final(Double precio_final) {
-        this.precio_final = precio_final;
-    }
-
-    public Concesionario getConcesionario() {
-        return concesionario;
-    }
-
-    public void setConcesionario(Concesionario concesionario) {
-        this.concesionario = concesionario;
-    }
-
-    public Propietario getPropietario() {
-        return propietario;
-    }
-
-    public void setPropietario(Propietario propietario) {
-        this.propietario = propietario;
-    }
-
-    public Coche getCoche() {
-        return coche;
-    }
-
-    public void setCoche(Coche coche) {
-        this.coche = coche;
     }
 
     @Override

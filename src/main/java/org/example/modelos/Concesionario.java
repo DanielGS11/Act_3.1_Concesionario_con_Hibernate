@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@NamedQuery(
-        name = "Concesionario.buscarPorID",
-        query = "SELECT c FROM Concesionario c WHERE id = :id"
-)
 public class Concesionario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

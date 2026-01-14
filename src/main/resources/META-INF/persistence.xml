@@ -22,7 +22,7 @@
         <properties>
             <!-- 1. CONFIGURACIÓN JDBC (CONEXIÓN) -->
             <!-- Cambia 'mibd_ra3' por el nombre de tu base de datos creada en MySQL -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/concesionario_hibernate?serverTimezone=UTC"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/concesionario?serverTimezone=UTC"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
             <!-- Pon aquí tu contraseña de MySQL, si no tienes, déjalo vacío -->
             <property name="jakarta.persistence.jdbc.password" value="root"/>
